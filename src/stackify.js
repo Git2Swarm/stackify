@@ -15,27 +15,27 @@ var opts = { "filters": {"label": ["com.docker.stack.namespace"]} };
 
 app.get('/', function (request, response) {
     docker.listServices(opts, function (err, services) {
-        var stackCount = new Array(); 
-        var stackStartTime = new Array(); 
-        var stackUpdateTime = new Array(); 
+        var stackServiceCount = new Array(); 
+        var stackStartTime    = new Array(); 
+ 
         for ( i = 0; i < services.length; i++) {
             var labels = (services[i].Spec.Labels);
             for (var key in labels) {
                 if ( "com.docker.stack.namespace" != key ) continue;
                 var stackName= labels[key];
-                if ( stackCount[stackName] == undefined ){
-                    stackCount[stackName] = 1;
+                if ( stackServiceCount[stackName] == undefined ){
+                    stackServiceCount[stackName] = 1;
                     stackStartTime[stackName] =services[i].CreatedAt;
                 } else {
-                    stackCount[stackName]++;
+                    stackServiceCount[stackName]++;
                 }
             }
         }    
         
-        response.writeHead(200, {"Content-Type":"json"});
+        response.writeHead(200, {"Content-Type": "json", "Access-Control-Allow-Origin" : "*"});
         var output = [];
-        for (var key in stackCount) {
-            output.push ( { name: key, count: stackCount[key], StartTime: stackStartTime[key] });
+        for (var key in stackServiceCount) {
+            output.push ( { name: key, count: stackServiceCount[key], StartTime: stackStartTime[key] });
         }
         response.write( JSON.stringify( output ) );
         response.end();
